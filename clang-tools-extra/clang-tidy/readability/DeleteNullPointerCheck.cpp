@@ -40,13 +40,15 @@ void DeleteNullPointerCheck::registerMatchers(MatchFinder *Finder) {
                      hasEitherOperand(PointerExpr));
 
   Finder->addMatcher(
-      ifStmt(hasCondition(anyOf(PointerCondition, BinaryPointerCheckCondition)),
-             hasThen(anyOf(
-                 DeleteExpr, DeleteMemberExpr,
-                 compoundStmt(anyOf(has(DeleteExpr), has(DeleteMemberExpr)),
-                              statementCountIs(1))
-                     .bind("compound"))))
-          .bind("ifWithDelete"),
+      traverse(ast_type_traits::TK_AsIs,
+               ifStmt(hasCondition(
+                          anyOf(PointerCondition, BinaryPointerCheckCondition)),
+                      hasThen(anyOf(DeleteExpr, DeleteMemberExpr,
+                                    compoundStmt(anyOf(has(DeleteExpr),
+                                                       has(DeleteMemberExpr)),
+                                                 statementCountIs(1))
+                                        .bind("compound"))))
+                   .bind("ifWithDelete")),
       this);
 }
 
