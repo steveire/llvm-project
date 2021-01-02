@@ -56,26 +56,23 @@ AST_MATCHER(Expr, usedInBooleanContext) {
   const char *ExprName = "__booleanContextExpr";
   auto Result =
       expr(expr().bind(ExprName),
-           anyOf(hasParent(varDecl(hasType(booleanType()))),
+           anyOf(hasParent(
+                     mapAnyOf(varDecl, fieldDecl).with(hasType(booleanType()))),
                  hasParent(cxxConstructorDecl(
                      hasAnyConstructorInitializer(cxxCtorInitializer(
                          withInitializer(expr(equalsBoundNode(ExprName))),
                          forField(hasType(booleanType())))))),
-                 hasParent(fieldDecl(hasType(booleanType()))),
                  hasParent(stmt(anyOf(
                      explicitCastExpr(hasDestinationType(booleanType())),
-                     ifStmt(hasCondition(expr(equalsBoundNode(ExprName)))),
-                     doStmt(hasCondition(expr(equalsBoundNode(ExprName)))),
-                     whileStmt(hasCondition(expr(equalsBoundNode(ExprName)))),
-                     forStmt(hasCondition(expr(equalsBoundNode(ExprName)))),
-                     conditionalOperator(
-                         hasCondition(expr(equalsBoundNode(ExprName)))),
+                     mapAnyOf(ifStmt, doStmt, whileStmt, forStmt,
+                              conditionalOperator)
+                         .with(hasCondition(expr(equalsBoundNode(ExprName)))),
                      parenListExpr(hasParent(varDecl(hasType(booleanType())))),
                      parenExpr(hasParent(
                          explicitCastExpr(hasDestinationType(booleanType())))),
                      returnStmt(forFunction(returns(booleanType()))),
                      cxxUnresolvedConstructExpr(hasType(booleanType())),
-                     callExpr(hasAnyArgumentWithParam(
+                     callOrConstruct(hasAnyArgumentWithParam(
                          expr(equalsBoundNode(ExprName)),
                          parmVarDecl(hasType(booleanType())))),
                      binaryOperator(hasAnyOperatorName("&&", "||")),
@@ -181,21 +178,12 @@ void ContainerSizeEmptyCheck::registerMatchers(MatchFinder *Finder) {
                     expr(hasType(pointsTo(ValidContainer))).bind("Pointee"))),
             expr(hasType(ValidContainer)).bind("STLObject"));
   Finder->addMatcher(
-      cxxOperatorCallExpr(
-          unless(isInTemplateInstantiation()),
-          hasAnyOverloadedOperatorName("==", "!="),
-          anyOf(allOf(hasArgument(0, WrongComparend), hasArgument(1, STLArg)),
-                allOf(hasArgument(0, STLArg), hasArgument(1, WrongComparend))),
-          unless(hasAncestor(
-              cxxMethodDecl(ofClass(equalsBoundNode("container"))))))
-          .bind("BinCmp"),
-      this);
-  Finder->addMatcher(
-      binaryOperator(hasAnyOperatorName("==", "!="),
-                     anyOf(allOf(hasLHS(WrongComparend), hasRHS(STLArg)),
-                           allOf(hasLHS(STLArg), hasRHS(WrongComparend))),
-                     unless(hasAncestor(
-                         cxxMethodDecl(ofClass(equalsBoundNode("container"))))))
+      binaryOperation(unless(isInTemplateInstantiation()),
+                      hasAnyOperatorName("==", "!="),
+                      hasOperands(ignoringParenImpCasts(WrongComparend),
+                                  ignoringParenImpCasts(STLArg)),
+                      unless(hasAncestor(cxxMethodDecl(
+                          ofClass(equalsBoundNode("container"))))))
           .bind("BinCmp"),
       this);
 }
