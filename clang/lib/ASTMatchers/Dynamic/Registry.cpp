@@ -152,6 +152,7 @@ RegistryMaps::RegistryMaps() {
   REGISTER_MATCHER(builtinType);
   REGISTER_MATCHER(cStyleCastExpr);
   REGISTER_MATCHER(callExpr);
+  REGISTER_MATCHER(callOrConstruct);
   REGISTER_MATCHER(caseStmt);
   REGISTER_MATCHER(castExpr);
   REGISTER_MATCHER(characterLiteral);
