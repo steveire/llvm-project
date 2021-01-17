@@ -102,6 +102,9 @@ RegistryMaps::RegistryMaps() {
   // Other:
   // equalsNode
 
+  registerMatcher("mapAnyOf",
+                  std::make_unique<internal::MapAnyOfBuilderDescriptor>());
+
   REGISTER_OVERLOADED_2(callee);
   REGISTER_OVERLOADED_2(hasAnyCapture);
   REGISTER_OVERLOADED_2(hasPrefix);

@@ -1057,6 +1057,55 @@ public:
   ASTNodeKind nodeMatcherType() const override { return ASTNodeKind(); }
 };
 
+class MapAnyOfBuilderDescriptor : public MatcherDescriptor {
+public:
+  VariantMatcher create(SourceRange NameRange, ArrayRef<ParserValue> Args,
+                        Diagnostics *Error) const override {
+    return {};
+  }
+
+  bool isBuilderMatcher() const override { return true; }
+
+  std::unique_ptr<MatcherDescriptor>
+  buildMatcherCtor(SourceRange NameRange, ArrayRef<ParserValue> Args,
+                   Diagnostics *Error) const override {
+
+    std::vector<ASTNodeKind> NodeKinds;
+    for (auto Arg : Args) {
+      if (!Arg.Value.isNodeKind())
+        return {};
+      NodeKinds.push_back(Arg.Value.getNodeKind());
+    }
+
+    if (NodeKinds.empty()) {
+      // Set error
+      return {};
+    }
+
+    ASTNodeKind CladeNodeKind = NodeKinds.front().getCladeKind();
+
+    return std::make_unique<MapAnyOfMatcherDescriptor>(CladeNodeKind,
+                                                       NodeKinds);
+  }
+
+  bool isVariadic() const override { return false; }
+
+  unsigned getNumArgs() const override { return 0; }
+
+  void getArgKinds(ASTNodeKind ThisKind, unsigned ArgNo,
+                   std::vector<ArgKind> &ArgKinds) const override {
+    return;
+  }
+  bool isConvertibleTo(ASTNodeKind Kind, unsigned *Specificity = nullptr,
+                       ASTNodeKind *LeastDerivedKind = nullptr) const override {
+    return false;
+  }
+
+  bool isPolymorphic() const override { return false; }
+
+  ASTNodeKind nodeMatcherType() const override { return ASTNodeKind(); }
+};
+
 /// Helper functions to select the appropriate marshaller functions.
 /// They detect the number of arguments, arguments types and return type.
 
