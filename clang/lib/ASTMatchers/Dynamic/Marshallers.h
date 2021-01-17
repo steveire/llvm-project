@@ -309,6 +309,14 @@ public:
                                 ArrayRef<ParserValue> Args,
                                 Diagnostics *Error) const = 0;
 
+  virtual ASTNodeKind nodeMatcherType() const = 0;
+
+  virtual bool isBuilderMatcher() const = 0;
+
+  virtual std::unique_ptr<MatcherDescriptor>
+  buildMatcherCtor(SourceRange NameRange, ArrayRef<ParserValue> Args,
+                   Diagnostics *Error) const = 0;
+
   /// Returns whether the matcher is variadic. Variadic matchers can take any
   /// number of arguments, but they must be of the same type.
   virtual bool isVariadic() const = 0;
@@ -385,6 +393,16 @@ public:
                         Diagnostics *Error) const override {
     return Marshaller(Func, MatcherName, NameRange, Args, Error);
   }
+
+  bool isBuilderMatcher() const override { return false; }
+
+  std::unique_ptr<MatcherDescriptor>
+  buildMatcherCtor(SourceRange NameRange, ArrayRef<ParserValue> Args,
+                   Diagnostics *Error) const override {
+    return {};
+  }
+
+  ASTNodeKind nodeMatcherType() const override { return ASTNodeKind(); }
 
   bool isVariadic() const override { return false; }
   unsigned getNumArgs() const override { return ArgKinds.size(); }
@@ -551,7 +569,8 @@ public:
       StringRef MatcherName)
       : Func(&variadicMatcherDescriptor<ResultT, ArgT, F>),
         MatcherName(MatcherName.str()),
-        ArgsKind(ArgTypeTraits<ArgT>::getKind()) {
+        ArgsKind(ArgTypeTraits<ArgT>::getKind()),
+        ArgsNodeKind(ASTNodeKind::getFromNodeKind<ArgT>()) {
     BuildReturnTypeVector<ResultT>::build(RetKinds);
   }
 
@@ -560,6 +579,16 @@ public:
                         Diagnostics *Error) const override {
     return Func(MatcherName, NameRange, Args, Error);
   }
+
+  bool isBuilderMatcher() const override { return false; }
+
+  std::unique_ptr<MatcherDescriptor>
+  buildMatcherCtor(SourceRange NameRange, ArrayRef<ParserValue> Args,
+                   Diagnostics *Error) const override {
+    return {};
+  }
+
+  ASTNodeKind nodeMatcherType() const override { return ArgsNodeKind; }
 
   bool isVariadic() const override { return true; }
   unsigned getNumArgs() const override { return 0; }
@@ -580,6 +609,7 @@ private:
   const std::string MatcherName;
   std::vector<ASTNodeKind> RetKinds;
   const ArgKind ArgsKind;
+  const ASTNodeKind ArgsNodeKind;
 };
 
 /// Return CK_Trivial when appropriate for VariadicDynCastAllOfMatchers.
@@ -609,6 +639,8 @@ public:
       return false;
     }
   }
+
+  ASTNodeKind nodeMatcherType() const override { return DerivedKind; }
 
 private:
   const ASTNodeKind DerivedKind;
@@ -786,6 +818,15 @@ public:
     return false;
   }
 
+  bool isBuilderMatcher() const override { return false; }
+  std::unique_ptr<MatcherDescriptor>
+  buildMatcherCtor(SourceRange NameRange, ArrayRef<ParserValue> Args,
+                   Diagnostics *Error) const override {
+    return {};
+  }
+
+  ASTNodeKind nodeMatcherType() const override { return ASTNodeKind(); }
+
 private:
   std::vector<std::unique_ptr<MatcherDescriptor>> Overloads;
 };
@@ -856,6 +897,15 @@ public:
                   ArgTypeTraits<llvm::Regex::RegexFlags>::get(Args[1].Value)));
   }
 
+  bool isBuilderMatcher() const override { return false; }
+  std::unique_ptr<MatcherDescriptor>
+  buildMatcherCtor(SourceRange NameRange, ArrayRef<ParserValue> Args,
+                   Diagnostics *Error) const override {
+    return {};
+  }
+
+  ASTNodeKind nodeMatcherType() const override { return ASTNodeKind(); }
+
 private:
   ReturnType (*const WithFlags)(StringRef, llvm::Regex::RegexFlags);
   ReturnType (*const NoFlags)(StringRef);
@@ -917,6 +967,15 @@ public:
   }
 
   bool isPolymorphic() const override { return true; }
+
+  bool isBuilderMatcher() const override { return false; }
+  std::unique_ptr<MatcherDescriptor>
+  buildMatcherCtor(SourceRange NameRange, ArrayRef<ParserValue> Args,
+                   Diagnostics *Error) const override {
+    return {};
+  }
+
+  ASTNodeKind nodeMatcherType() const override { return ASTNodeKind(); }
 
 private:
   const unsigned MinCount;
@@ -987,6 +1046,15 @@ public:
       *LeastDerivedKind = CladeNodeKind;
     return true;
   }
+
+  bool isBuilderMatcher() const override { return false; }
+  std::unique_ptr<MatcherDescriptor>
+  buildMatcherCtor(SourceRange NameRange, ArrayRef<ParserValue> Args,
+                   Diagnostics *Error) const override {
+    return {};
+  }
+
+  ASTNodeKind nodeMatcherType() const override { return ASTNodeKind(); }
 };
 
 /// Helper functions to select the appropriate marshaller functions.
