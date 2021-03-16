@@ -175,6 +175,10 @@ public:
     return AllowEnablingAnalyzerAlphaCheckers;
   }
 
+  void setSelfContainedDiags(bool Value) { SelfContainedDiags = Value; }
+
+  bool areDiagsSelfContained() const { return SelfContainedDiags; }
+
   using DiagLevelAndFormatString = std::pair<DiagnosticIDs::Level, std::string>;
   DiagLevelAndFormatString getDiagLevelAndFormatString(unsigned DiagnosticID,
                                                        SourceLocation Loc) {
@@ -210,6 +214,7 @@ private:
   std::string ProfilePrefix;
 
   bool AllowEnablingAnalyzerAlphaCheckers;
+  bool SelfContainedDiags;
 };
 
 /// Check whether a given diagnostic should be suppressed due to the presence

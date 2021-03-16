@@ -284,7 +284,7 @@ void PreferMemberInitializerCheck::check(
           Diag << FixItHint::CreateInsertion(InsertPos, Insertion,
                                              FirstToCtorInits)
                << FixItHint::CreateRemoval(StmtRange);
-          FirstToCtorInits = false;
+          FirstToCtorInits = areDiagsSelfContained();
         }
       }
     }
