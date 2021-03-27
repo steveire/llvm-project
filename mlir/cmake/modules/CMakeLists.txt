@@ -17,6 +17,8 @@ get_property(MLIR_CONVERSION_LIBS GLOBAL PROPERTY MLIR_CONVERSION_LIBS)
 get_property(MLIR_TRANSLATION_LIBS GLOBAL PROPERTY MLIR_TRANSLATION_LIBS)
 
 # Generate MlirConfig.cmake for the build tree.
+include(CMakePackageConfigHelpers)
+
 set(MLIR_CONFIG_CMAKE_DIR "${mlir_cmake_builddir}")
 set(MLIR_CONFIG_LLVM_CMAKE_DIR "${llvm_cmake_builddir}")
 set(MLIR_CONFIG_EXPORTS_FILE "\${MLIR_CMAKE_DIR}/MLIRTargets.cmake")
@@ -28,6 +30,11 @@ configure_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/MLIRConfig.cmake.in
   ${mlir_cmake_builddir}/MLIRConfig.cmake
   @ONLY)
+write_basic_package_version_file(
+  "${mlir_cmake_builddir}/MLIRConfigVersion.cmake"
+  VERSION "${PACKAGE_VERSION}"
+  COMPATIBILITY SameMinorVersion
+)
 set(MLIR_CONFIG_CMAKE_DIR)
 set(MLIR_CONFIG_LLVM_CMAKE_DIR)
 set(MLIR_CONFIG_EXPORTS_FILE)
@@ -80,6 +87,7 @@ if (NOT LLVM_INSTALL_TOOLCHAIN_ONLY)
 
   install(FILES
     ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/MLIRConfig.cmake
+    ${mlir_cmake_builddir}/MLIRConfigVersion.cmake
     ${CMAKE_CURRENT_SOURCE_DIR}/AddMLIR.cmake
     DESTINATION ${MLIR_INSTALL_PACKAGE_DIR}
     COMPONENT mlir-cmake-exports)

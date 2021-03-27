@@ -5,6 +5,7 @@ if (NOT DEFINED LLVM_MAIN_SRC_DIR)
 
   # Where is LLVM installed?
   find_package(LLVM CONFIG REQUIRED)
+  set(PACKAGE_VERSION "${LLVM_PACKAGE_VERSION}")
   set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${LLVM_CMAKE_DIR})
   include(HandleLLVMOptions)
   include(AddLLVM)

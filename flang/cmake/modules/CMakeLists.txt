@@ -12,6 +12,8 @@ get_property(FLANG_EXPORTS GLOBAL PROPERTY FLANG_EXPORTS)
 export(TARGETS ${FLANG_EXPORTS} FILE ${flang_cmake_builddir}/FlangTargets.cmake)
 
 # Generate FlangConfig.cmake for the build tree.
+include(CMakePackageConfigHelpers)
+
 set(FLANG_CONFIG_CMAKE_DIR "${flang_cmake_builddir}")
 set(FLANG_CONFIG_LLVM_CMAKE_DIR "${llvm_cmake_builddir}")
 set(FLANG_CONFIG_EXPORTS_FILE "${flang_cmake_builddir}/FlangTargets.cmake")
@@ -23,6 +25,11 @@ configure_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/FlangConfig.cmake.in
   ${flang_cmake_builddir}/FlangConfig.cmake
   @ONLY)
+write_basic_package_version_file(
+  "${flang_cmake_builddir}/FlangConfigVersion.cmake"
+  VERSION "${PACKAGE_VERSION}"
+  COMPATIBILITY SameMinorVersion
+)
 set(FLANG_CONFIG_CMAKE_DIR)
 set(FLANG_CONFIG_LLVM_CMAKE_DIR)
 set(FLANG_CONFIG_EXPORTS_FILE)
@@ -62,6 +69,7 @@ if (NOT LLVM_INSTALL_TOOLCHAIN_ONLY)
 
   install(FILES
     ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/FlangConfig.cmake
+    ${flang_cmake_builddir}/FlangConfigVersion.cmake
     DESTINATION ${FLANG_INSTALL_PACKAGE_DIR}
     COMPONENT flang-cmake-exports)
 

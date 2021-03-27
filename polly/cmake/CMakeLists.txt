@@ -67,10 +67,17 @@ endforeach(tgt)
 
 # PollyConfig holds the target definitions and general settings, PollyExports
 # the imported locations
+include(CMakePackageConfigHelpers)
+
 configure_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/PollyConfig.cmake.in
   ${POLLY_CONFIG_CMAKE_DIR}/PollyConfig.cmake
   @ONLY)
+write_basic_package_version_file(
+  "${POLLY_CONFIG_CMAKE_DIR}/PollyConfigVersion.cmake"
+  VERSION "${PACKAGE_VERSION}"
+  COMPATIBILITY SameMinorVersion
+)
 
 file(GENERATE
   OUTPUT ${POLLY_CONFIG_CMAKE_DIR}/${POLLY_EXPORTS_FILE_NAME}
@@ -128,6 +135,7 @@ if (NOT LLVM_INSTALL_TOOLCHAIN_ONLY)
   install(
     FILES
     "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/PollyConfig.cmake"
+    "${POLLY_CONFIG_CMAKE_DIR}/PollyConfigVersion.cmake"
     "${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/${POLLY_EXPORTS_FILE_NAME}"
     DESTINATION "${POLLY_INSTALL_PACKAGE_DIR}")
 endif ()

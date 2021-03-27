@@ -12,6 +12,8 @@ get_property(LLD_EXPORTS GLOBAL PROPERTY LLD_EXPORTS)
 export(TARGETS ${LLD_EXPORTS} FILE ${lld_cmake_builddir}/LLDTargets.cmake)
 
 # Generate LLDConfig.cmake for the build tree.
+include(CMakePackageConfigHelpers)
+
 set(LLD_CONFIG_CMAKE_DIR "${lld_cmake_builddir}")
 set(LLD_CONFIG_LLVM_CMAKE_DIR "${llvm_cmake_builddir}")
 set(LLD_CONFIG_EXPORTS_FILE "${lld_cmake_builddir}/LLDTargets.cmake")
@@ -23,6 +25,11 @@ configure_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/LLDConfig.cmake.in
   ${lld_cmake_builddir}/LLDConfig.cmake
   @ONLY)
+write_basic_package_version_file(
+  "${lld_cmake_builddir}/LLDConfigVersion.cmake"
+  VERSION "${PACKAGE_VERSION}"
+  COMPATIBILITY SameMinorVersion
+)
 set(LLD_CONFIG_CMAKE_DIR)
 set(LLD_CONFIG_LLVM_CMAKE_DIR)
 set(LLD_CONFIG_EXPORTS_FILE)
@@ -59,6 +66,7 @@ if (NOT LLVM_INSTALL_TOOLCHAIN_ONLY)
 
   install(FILES
     ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/LLDConfig.cmake
+    ${lld_cmake_builddir}/LLDConfigVersion.cmake
     DESTINATION ${LLD_INSTALL_PACKAGE_DIR}
     COMPONENT lld-cmake-exports)
 

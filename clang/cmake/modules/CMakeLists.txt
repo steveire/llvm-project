@@ -12,6 +12,8 @@ get_property(CLANG_EXPORTS GLOBAL PROPERTY CLANG_EXPORTS)
 export(TARGETS ${CLANG_EXPORTS} FILE ${clang_cmake_builddir}/ClangTargets.cmake)
 
 # Generate ClangConfig.cmake for the build tree.
+include(CMakePackageConfigHelpers)
+
 set(CLANG_CONFIG_CMAKE_DIR "${clang_cmake_builddir}")
 set(CLANG_CONFIG_LLVM_CMAKE_DIR "${llvm_cmake_builddir}")
 set(CLANG_CONFIG_EXPORTS_FILE "${clang_cmake_builddir}/ClangTargets.cmake")
@@ -23,6 +25,11 @@ configure_file(
   ${CMAKE_CURRENT_SOURCE_DIR}/ClangConfig.cmake.in
   ${clang_cmake_builddir}/ClangConfig.cmake
   @ONLY)
+write_basic_package_version_file(
+  "${clang_cmake_builddir}/ClangConfigVersion.cmake"
+  VERSION "${PACKAGE_VERSION}"
+  COMPATIBILITY SameMinorVersion
+)
 set(CLANG_CONFIG_CMAKE_DIR)
 set(CLANG_CONFIG_LLVM_CMAKE_DIR)
 set(CLANG_CONFIG_EXPORTS_FILE)
@@ -61,6 +68,7 @@ if (NOT LLVM_INSTALL_TOOLCHAIN_ONLY)
 
   install(FILES
     ${CMAKE_CURRENT_BINARY_DIR}/CMakeFiles/ClangConfig.cmake
+    ${clang_cmake_builddir}/ClangConfigVersion.cmake
     ${CMAKE_CURRENT_SOURCE_DIR}/AddClang.cmake
     DESTINATION ${CLANG_INSTALL_PACKAGE_DIR}
     COMPONENT clang-cmake-exports)
